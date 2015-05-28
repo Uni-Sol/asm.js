@@ -1,5 +1,5 @@
 var ty = require('../lib/types');
-var asmAssert = require('./asmAssert');
+var asmAssert = require('../lib/asmAssert');
 
 exports.testModuloIntish1 = asmAssert.one(
     "% doesn't return int",
@@ -197,5 +197,107 @@ exports.testAbs = asmAssert(
         function f() {
             return abs(1)|0;
         }
+        return f;
+    }, { pass: true });
+
+exports.testIf = asmAssert(
+    "if condition is Int",
+    function m(){
+        "use asm";
+        function f(x,y) {
+            x = x|0;
+            y = y|0;
+            if (x) {
+                y = 3;
+            }
+        }
+        return f;
+    }, { pass: true });
+
+exports.testEmpty = asmAssert(
+    "empty statements",
+    function m(){
+        "use asm";
+        function f() {
+            ;
+            ;
+            ;
+            {};
+            if (0);
+            if (0) {};
+        }
+        return f;
+    }, { pass: true });
+
+exports.testMinMax = asmAssert(
+    "min and max validate",
+    function m(stdlib, foreign, heap) {
+        "use asm";
+        var max = stdlib.Math.max;
+        var min = stdlib.Math.min;
+        function f(i0, i1, d0, d1) {
+            i0 = i0|0;
+            i1 = i1|0;
+            d0 = +d0;
+            d1 = +d1;
+            var ia = 0;
+            var ib = 0;
+            var da = 0.0;
+            var db = 0.0;
+            ia = max(i0, i1)|0;
+            ib = min(i0, i1)|0;
+            da = +max(d0, d1);
+            db = +min(d0, d1);
+            return +(+(+(ia + ib|0) + d0) + d1);
+        }
+        return f;
+    }, { pass: true });
+
+exports.testMinWrongArgumentType = asmAssert(
+    "min argument types don't match",
+    function m(stdlib, foreign, heap) {
+        "use asm";
+        var min = stdlib.Math.min;
+        function f(i0, d1) {
+            i0 = i0|0;
+            d1 = +d1;
+            min(i0, d1)|0;
+        }
+        return f;
+    }, { pass: false });
+
+exports.testMaxWrongArgumentType = asmAssert(
+    "min argument types don't match",
+    function m(stdlib, foreign, heap) {
+        "use asm";
+        var max = stdlib.Math.max;
+        function f(d0, i1) {
+            d0 = +d0;
+            i1 = i1|0;
+            +max(d0, i1);
+        }
+        return f;
+    }, { pass: false });
+
+exports.testMaxWrongReturnType = asmAssert(
+    "min argument types don't match",
+    function m(stdlib, foreign, heap) {
+        "use asm";
+        var max = stdlib.Math.max;
+        function f(i0, i1) {
+            i0 = i0|0;
+            i1 = i1|0;
+            +max(i0, i1);
+        }
+        return f;
+    }, { pass: false });
+
+exports.testFunctionTables = asmAssert(
+    "function tables",
+    function m(stdlib, foreign, heap) {
+        "use asm"
+        function f() {}
+        function g() {}
+        var x = [f], y = [g], z = [f, g]
         return f;
     }, { pass: true });
